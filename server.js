@@ -8,13 +8,13 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors()); // Разрешить кросс-доменные запросы
-app.use(express.json()); // Парсинг JSON
+app.use(cors());
+app.use(express.json());
 
 // Настройка рейт-лимитера: 10 запросов в минуту на IP
 const limiter = rateLimit({
     windowMs: 60 * 1000, // 1 минута
-    max: 10, // Максимум 10 запросов
+    max: 10,
     message: 'Слишком много запросов, попробуйте позже.',
 });
 app.use('/api', limiter);
@@ -28,17 +28,17 @@ const openai = new OpenAI({
 // Эндпоинт для обработки запросов к xAI
 app.post('/api/completions', async (req, res) => {
     try {
-        const { model, prompt, max_tokens, temperature } = req.body;
+        const { messages, model, max_tokens, temperature } = req.body;
 
         // Валидация входных данных
-        if (!prompt) {
-            return res.status(400).json({ error: 'Prompt обязателен' });
+        if (!messages || !Array.isArray(messages) || messages.length === 0) {
+            return res.status(400).json({ error: 'Массив messages обязателен' });
         }
 
         // Запрос к xAI
-        const response = await openai.completions.create({
-            model: model || 'grok-3', // Укажите модель xAI
-            prompt,
+        const response = await openai.chat.completions.create({
+            model: model || 'grok-3',
+            messages: messages,
             max_tokens: max_tokens || 100,
             temperature: temperature || 0.7,
         });
