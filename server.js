@@ -14,7 +14,7 @@ app.use(express.json());
 // Настройка рейт-лимитера: 10 запросов в минуту на IP
 const limiter = rateLimit({
     windowMs: 60 * 1000, // 1 минута
-    max: 10,
+    max: 1000,
     message: 'Слишком много запросов, попробуйте позже.',
 });
 app.use('/api', limiter);
